@@ -12,9 +12,11 @@
     "test:watch": "jest --watch"
   },
   "dependencies": {
+    "@types/react-modal": "^3.16.3",
     "next": "15.2.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-modal": "^3.16.3",
     "reactflow": "^11.11.4"
   },
   "devDependencies": {

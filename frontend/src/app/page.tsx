@@ -1,5 +1,13 @@
-import GraphDisplay from '../components/GraphDisplay/GraphDisplay';
+'use client';
+
+import React from 'react';
+import { GraphContainer } from '../components/Graph/GraphContainer';
+import '../styles/graph.css';
 
 export default function Home() {
-    return <GraphDisplay />;
+    return (
+        <div className="app-container">
+            <GraphContainer />
+        </div>
+    );
 }

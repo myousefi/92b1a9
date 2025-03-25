@@ -1,0 +1,200 @@
+/* Modal overlay - covers the entire screen */
+.form-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 20px;
+}
+
+/* Modal content - the actual modal box */
+.form-modal {
+  position: relative;
+  background-color: white;
+  border-radius: 8px;
+  width: 90%;
+  max-width: 600px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  outline: none;
+  margin: auto;
+  transform: translate(0, 0); /* Reset any transforms */
+}
+
+/* Modal header */
+.form-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e0e0e0;
+  background-color: #f8f8f8;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.form-modal-header h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.close-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #666;
+  padding: 0;
+  line-height: 1;
+}
+
+.close-button:hover {
+  color: #e53e3e;
+}
+
+.form-modal-content {
+  padding: 20px;
+}
+
+.form-modal-section {
+    margin-bottom: 24px;
+}
+
+.form-modal-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-top: 0;
+    margin-bottom: 12px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 8px;
+}
+
+.no-fields {
+    color: #666;
+    font-style: italic;
+}
+
+.field-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.field-item {
+    background-color: #f8f8f8;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #eee;
+}
+
+.field-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.field-name {
+    font-weight: 500;
+    color: #333;
+}
+
+.field-type {
+    font-size: 12px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background-color: #e2e8f0;
+    color: #4a5568;
+}
+
+.field-type.string, .field-type.short-text {
+    background-color: #e6fffa;
+    color: #319795;
+}
+
+.field-type.number {
+    background-color: #ebf8ff;
+    color: #3182ce;
+}
+
+.field-type.boolean {
+    background-color: #faf5ff;
+    color: #805ad5;
+}
+
+.field-type.array, .field-type.multi-select {
+    background-color: #fff5f5;
+    color: #e53e3e;
+}
+
+.field-type.object, .field-type.object-enum {
+    background-color: #fffaf0;
+    color: #dd6b20;
+}
+
+.field-details {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.field-required {
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.field-required.required {
+    color: #e53e3e;
+}
+
+.field-required.optional {
+    color: #718096;
+}
+
+.field-prefill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+}
+
+.prefill-label {
+    color: #718096;
+}
+
+.prefill-value {
+    color: #4a5568;
+    font-style: italic;
+}
+
+.prefill-configure-button {
+    margin-left: auto;
+    background-color: #edf2f7;
+    border: none;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    cursor: pointer;
+    color: #4a5568;
+    transition: all 0.2s ease;
+}
+
+.prefill-configure-button:hover {
+    background-color: #e2e8f0;
+    color: #2d3748;
+}

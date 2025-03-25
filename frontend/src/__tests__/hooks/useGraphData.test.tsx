@@ -30,16 +30,22 @@ describe('useGraphData', () => {
         // Mock the fetchGraphData function
         (fetchGraphData as jest.Mock).mockResolvedValueOnce(mockGraphData);
 
+        // Use a promise to control when the mock resolves
+        let resolvePromise: (value: unknown) => void;
+        const promise = new Promise((resolve) => {
+            resolvePromise = resolve;
+        });
+
         // Render the hook
         const { result } = renderHook(() => useGraphData());
 
         // Initial state should be loading
         expect(result.current.loading).toBe(true);
 
-        // Wait for the async operation to complete
+        // Resolve the promise to trigger the state update
         await act(async () => {
-            // This will wait for all promises to resolve
-            await new Promise(resolve => setTimeout(resolve, 0));
+            resolvePromise!(null);
+            await promise;
         });
 
         // Check the final state
@@ -54,16 +60,26 @@ describe('useGraphData', () => {
         const mockError = new Error('Failed to fetch');
         (fetchGraphData as jest.Mock).mockRejectedValueOnce(mockError);
 
+        // Use a promise to control when the mock rejects
+        let rejectPromise: (reason?: any) => void;
+        const promise = new Promise((_, reject) => {
+            rejectPromise = reject;
+        });
+
         // Render the hook
         const { result } = renderHook(() => useGraphData());
 
         // Initial state should be loading
         expect(result.current.loading).toBe(true);
 
-        // Wait for the async operation to complete
+        // Reject the promise to trigger the state update
         await act(async () => {
-            // This will wait for all promises to resolve
-            await new Promise(resolve => setTimeout(resolve, 0));
+            try {
+                rejectPromise!(mockError);
+                await promise;
+            } catch (e) {
+                // Expected rejection
+            }
         });
 
         // Check the final state

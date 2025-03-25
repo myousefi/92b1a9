@@ -1,27 +1,45 @@
-/* Add this to your global CSS */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  color: #333;
+  background-color: #f7fafc;
+}
+
+.app-container {
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Prevent scrolling when modal is open */
 body.ReactModal__Body--open {
-  overflow: hidden; /* Prevent scrolling of the background when modal is open */
+  overflow: hidden;
 }
 
-/* Animation classes for the modal */
-.form-modal-after-open {
-  opacity: 1;
-  transform: translateY(0);
-  transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+/* Button styles */
+button {
+  cursor: pointer;
 }
 
-.form-modal-before-close {
-  opacity: 0;
-  transform: translateY(-20px);
-  transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
 }
 
-.form-modal-overlay-after-open {
-  opacity: 1;
-  transition: opacity 300ms ease-in-out;
+/* Utility classes */
+.text-center {
+  text-align: center;
 }
 
-.form-modal-overlay-before-close {
-  opacity: 0;
-  transition: opacity 300ms ease-in-out;
+.mt-4 {
+  margin-top: 1rem;
+}
+
+.mb-4 {
+  margin-bottom: 1rem;
 }

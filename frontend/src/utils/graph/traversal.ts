@@ -1,149 +1,91 @@
-import { ProcessedNode, Edge } from '../../types';
+import { DataSource, Field } from '../../types';
+import { fetchGraphData } from '../../services/api/graphService';
 
 /**
- * Finds all direct dependencies of a node (forms that directly feed into this form)
- * @param nodeId The ID of the node to find dependencies for
- * @param nodes All nodes in the graph
- * @param edges All edges in the graph
- * @returns Array of nodes that are direct dependencies
- */
-export function findDirectDependencies(
-    nodeId: string,
-    nodes: ProcessedNode[],
-    edges: Edge[]
-): ProcessedNode[] {
-    // Find all edges where this node is the target
-    const incomingEdges = edges.filter(edge => edge.target === nodeId);
+   * Gets direct dependencies for a form
+   * @param formId The ID of the form to get dependencies for
+   * @returns Promise with an array of data sources
+   */
+export async function getDirectDependencies(formId: string): Promise<DataSource[]> {
+    try {
+        // Fetch the graph data
+        const graphData = await fetchGraphData();
 
-    // Get the source node IDs from these edges
-    const sourceNodeIds = incomingEdges.map(edge => edge.source);
+        // Find direct dependencies (forms that have edges pointing to this form)
+        const directDependencies: DataSource[] = [];
 
-    // Find the actual nodes from the node IDs
-    return nodes.filter(node => sourceNodeIds.includes(node.id));
-}
-
-/**
- * Finds all transitive dependencies of a node (forms that indirectly feed into this form)
- * @param nodeId The ID of the node to find dependencies for
- * @param nodes All nodes in the graph
- * @param edges All edges in the graph
- * @returns Array of nodes that are transitive dependencies
- */
-export function findTransitiveDependencies(
-    nodeId: string,
-    nodes: ProcessedNode[],
-    edges: Edge[]
-): ProcessedNode[] {
-    // Get direct dependencies
-    const directDeps = findDirectDependencies(nodeId, nodes, edges);
-    const directDepIds = directDeps.map(node => node.id);
-
-    // Initialize result with empty array
-    const transitiveDeps: ProcessedNode[] = [];
-
-    // For each direct dependency, find its dependencies recursively
-    directDepIds.forEach(depId => {
-        const ancestors = findAllAncestors(depId, nodes, edges);
-
-        // Add ancestors to the result if they're not already included
-        ancestors.forEach(ancestor => {
-            if (!transitiveDeps.some(dep => dep.id === ancestor.id) &&
-                !directDepIds.includes(ancestor.id)) {
-                transitiveDeps.push(ancestor);
+        graphData.edges.forEach(edge => {
+            if (edge.target === formId) {
+                // Find the source node
+                const sourceNode = graphData.nodes.find(node => node.id === edge.source);
+                if (sourceNode) {
+                    directDependencies.push({
+                        id: sourceNode.id,
+                        name: sourceNode.name,
+                        type: 'form'
+                    });
+                }
             }
         });
-    });
 
-    return transitiveDeps;
+        return directDependencies;
+    } catch (error) {
+        console.error('Error getting direct dependencies:', error);
+        return [];
+    }
 }
 
 /**
- * Recursively finds all ancestors (dependencies) of a node
- * @param nodeId The ID of the node to find ancestors for
- * @param nodes All nodes in the graph
- * @param edges All edges in the graph
- * @param visited Set of already visited node IDs (to prevent cycles)
- * @returns Array of all ancestor nodes
- */
-function findAllAncestors(
-    nodeId: string,
-    nodes: ProcessedNode[],
-    edges: Edge[],
-    visited: Set<string> = new Set()
-): ProcessedNode[] {
-    // Mark this node as visited
-    visited.add(nodeId);
+   * Gets transitive dependencies for a form (indirect dependencies)
+   * @param formId The ID of the form to get dependencies for
+   * @returns Promise with an array of data sources
+   */
+export async function getTransitiveDependencies(formId: string): Promise<DataSource[]> {
+    try {
+        // Fetch the graph data
+        const graphData = await fetchGraphData();
 
-    // Find direct dependencies
-    const directDeps = findDirectDependencies(nodeId, nodes, edges);
-    const result: ProcessedNode[] = [...directDeps];
+        // Get direct dependencies first
+        const directDeps = await getDirectDependencies(formId);
+        const directDepIds = new Set(directDeps.map(dep => dep.id));
 
-    // For each direct dependency, find its ancestors recursively
-    directDeps.forEach(dep => {
-        if (!visited.has(dep.id)) {
-            const ancestors = findAllAncestors(dep.id, nodes, edges, visited);
+        // Find all upstream forms recursively
+        const allDependencies = new Set<string>();
+        const visited = new Set<string>();
 
-            // Add ancestors to the result if they're not already included
-            ancestors.forEach(ancestor => {
-                if (!result.some(node => node.id === ancestor.id)) {
-                    result.push(ancestor);
+        function findUpstreamForms(nodeId: string) {
+            if (visited.has(nodeId)) return;
+            visited.add(nodeId);
+
+            graphData.edges.forEach(edge => {
+                if (edge.target === nodeId) {
+                    allDependencies.add(edge.source);
+                    findUpstreamForms(edge.source);
                 }
             });
         }
-    });
 
-    return result;
-}
+        // Start with the direct dependencies
+        directDepIds.forEach(depId => {
+            findUpstreamForms(depId);
+        });
 
-/**
- * Creates a cache key for dependency lookups
- */
-function createCacheKey(nodeId: string, type: 'direct' | 'transitive'): string {
-    return `${type}_${nodeId}`;
-}
+        // Remove direct dependencies to get only transitive ones
+        const transitiveDepIds = [...allDependencies].filter(id => !directDepIds.has(id));
 
-// Cache for dependency lookups
-const dependencyCache = new Map<string, ProcessedNode[]>();
+        // Convert IDs to DataSource objects
+        const transitiveDependencies: DataSource[] = transitiveDepIds.map(id => {
+            const node = graphData.nodes.find(node => node.id === id);
+            return {
+                id,
+                name: node?.name || id,
+                type: 'form'
+            };
+        });
 
-/**
- * Clears the dependency cache
- */
-export function clearDependencyCache(): void {
-    dependencyCache.clear();
-}
-
-/**
- * Gets direct dependencies with caching
- */
-export function getDirectDependencies(
-    nodeId: string,
-    nodes: ProcessedNode[],
-    edges: Edge[]
-): ProcessedNode[] {
-    const cacheKey = createCacheKey(nodeId, 'direct');
-
-    if (!dependencyCache.has(cacheKey)) {
-        const dependencies = findDirectDependencies(nodeId, nodes, edges);
-        dependencyCache.set(cacheKey, dependencies);
+        return transitiveDependencies;
+    } catch (error) {
+        console.error('Error getting transitive dependencies:', error);
+        return [];
     }
-
-    return dependencyCache.get(cacheKey) || [];
-}
-
-/**
- * Gets transitive dependencies with caching
- */
-export function getTransitiveDependencies(
-    nodeId: string,
-    nodes: ProcessedNode[],
-    edges: Edge[]
-): ProcessedNode[] {
-    const cacheKey = createCacheKey(nodeId, 'transitive');
-
-    if (!dependencyCache.has(cacheKey)) {
-        const dependencies = findTransitiveDependencies(nodeId, nodes, edges);
-        dependencyCache.set(cacheKey, dependencies);
-    }
-
-    return dependencyCache.get(cacheKey) || [];
 }

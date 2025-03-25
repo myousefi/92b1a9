@@ -1,71 +1,103 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import ReactFlow, {
     Background,
     Controls,
     MiniMap,
-    Node,
-    Edge,
-    NodeTypes
+    useNodesState,
+    useEdgesState,
+    Node as ReactFlowNode,
+    Edge as ReactFlowEdge,
+    Viewport
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { ProcessedNode } from '../../types';
+import { ProcessedNode, Edge } from '../../types';
 import { FormNode } from './FormNode';
-
-// Define custom node types
-const nodeTypes: NodeTypes = {
-    form: FormNode
-};
 
 interface GraphProps {
     nodes: ProcessedNode[];
-    edges: any[];
-    onNodeClick?: (node: ProcessedNode) => void;
+    edges: Edge[];
+    onNodeClick: (node: ProcessedNode) => void;
 }
 
+// Define the node types
+const nodeTypes = {
+    form: FormNode,
+};
+
+// Define default viewport
+const defaultViewport: Viewport = { x: 0, y: 0, zoom: 0.8 };
+
 export const Graph: React.FC<GraphProps> = ({ nodes, edges, onNodeClick }) => {
-    // Convert our nodes to ReactFlow format
-    const flowNodes: Node[] = nodes.map((node) => ({
+    // Convert our nodes to ReactFlow nodes
+    const initialNodes: ReactFlowNode[] = nodes.map(node => ({
         id: node.id,
         type: 'form',
         position: node.position,
         data: {
             ...node,
-            onClick: () => onNodeClick && onNodeClick(node)
-        }
+            onClick: () => onNodeClick(node)
+        },
     }));
 
-    // Ensure all edges have unique IDs
-    const flowEdges: Edge[] = edges.map((edge, index) => ({
-        id: edge.id || `edge-${index}`,
+    // Convert our edges to ReactFlow edges with custom styling
+    // Using bezier type edges as requested
+    const initialEdges: ReactFlowEdge[] = edges.map(edge => ({
+        id: `${edge.source}-${edge.target}`,
         source: edge.source,
         target: edge.target,
-        type: 'smoothstep',
+        type: 'bezier',
         animated: false,
-        style: { stroke: '#a0aec0', strokeWidth: 2 },
-        ...edge
+        style: {
+            stroke: '#d1d5db',
+            strokeWidth: 2,
+            opacity: 0.9,
+            transition: 'stroke-width ease-in-out .2s',
+        },
+        // No arrow markers as per requirements
+        className: 'custom-edge',
     }));
 
+    // Use ReactFlow's state hooks
+    const [reactFlowNodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+    const [reactFlowEdges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+    // Handle node click
+    const handleNodeClick = useCallback((event: React.MouseEvent, node: ReactFlowNode) => {
+        // Call the onNodeClick prop with the original node data
+        const originalNode = nodes.find(n => n.id === node.id);
+        if (originalNode) {
+            onNodeClick(originalNode);
+        }
+    }, [nodes, onNodeClick]);
+
     return (
-        <div className="graph-container">
+        <div className="diagram-container">
             <ReactFlow
-                nodes={flowNodes}
-                edges={flowEdges}
+                nodes={reactFlowNodes}
+                edges={reactFlowEdges}
+                onNodesChange={onNodesChange}
+                onEdgesChange={onEdgesChange}
+                onNodeClick={handleNodeClick}
                 nodeTypes={nodeTypes}
-                defaultEdgeOptions={{
-                    type: 'smoothstep',
-                    animated: false,
-                }}
                 fitView
-                fitViewOptions={{ padding: 0.2 }}
                 minZoom={0.5}
-                maxZoom={2}
+                maxZoom={1.5}
+                defaultViewport={defaultViewport}
+                attributionPosition="bottom-right"
+                style={{ backgroundColor: "#F7F9FB" }}
             >
-                <Background color="#aaa" gap={16} />
+                <Background
+                    color="#d1d5db"
+                    gap={20}
+                    size={1}
+                    variant="dots"
+                    className="diagram-background"
+                />
                 <Controls />
                 <MiniMap
-                    nodeStrokeColor="#aaa"
-                    nodeColor="#fff"
-                    nodeBorderRadius={8}
+                    nodeStrokeColor="#d1d5db"
+                    nodeColor="#ffffff"
+                    nodeBorderRadius={12}
                 />
             </ReactFlow>
         </div>

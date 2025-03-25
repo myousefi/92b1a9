@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useGraphData } from '../../hooks/useGraphData';
 import { Graph } from './Graph';
 import { LoadingError } from '../common/LoadingError';
-import { FormSidebar } from '../Modals/FormModal';
+import { FormSidebar } from '../Sidebar/FormSidebar';
 import { ProcessedNode } from '../../types';
 
 export const GraphContainer: React.FC = () => {
@@ -10,34 +10,37 @@ export const GraphContainer: React.FC = () => {
     const [selectedNode, setSelectedNode] = useState<ProcessedNode | null>(null);
 
     const handleNodeClick = (node: ProcessedNode) => {
-        console.log('Node clicked:', node); // Add this for debugging
         setSelectedNode(node);
     };
 
     const handleCloseSidebar = () => {
-        console.log('Closing sidebar'); // Add this for debugging
         setSelectedNode(null);
     };
 
+    if (loading) {
+        return <div className="loading">Loading graph data...</div>;
+    }
+
+    if (error) {
+        return <div className="error">Failed to load graph data: {error.message}</div>;
+    }
+
+    if (!data || !data.nodes || !data.edges || data.nodes.length === 0) {
+        return <div className="error">No graph data available</div>;
+    }
+
     return (
-        <LoadingError loading={loading} error={error}>
-            {data && data.nodes && data.edges && data.nodes.length > 0 ? (
-                <div className="graph-container-wrapper">
-                    <Graph
-                        nodes={data.nodes}
-                        edges={data.edges}
-                        onNodeClick={handleNodeClick}
-                    />
-                    {selectedNode && (
-                        <FormSidebar
-                            selectedNode={selectedNode}
-                            onClose={handleCloseSidebar}
-                        />
-                    )}
-                </div>
-            ) : (
-                <div className="error">No graph data available</div>
-            )}
-        </LoadingError>
+        <div className="graph-container">
+            <Graph
+                nodes={data.nodes}
+                edges={data.edges}
+                onNodeClick={handleNodeClick}
+            />
+
+            <FormSidebar
+                selectedNode={selectedNode}
+                onClose={handleCloseSidebar}
+            />
+        </div>
     );
 };

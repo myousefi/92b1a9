@@ -1,37 +1,33 @@
 import React, { memo } from 'react';
-import { Handle, Position } from 'reactflow';
+import { Handle, Position, NodeProps } from 'reactflow';
+import { FaWpforms } from 'react-icons/fa'; // Import form icon
 
-interface FormNodeProps {
-    data: {
-        id: string;
-        name: string;
-        fields: any[];
-        onClick?: () => void;
-    };
-    isConnectable: boolean;
-}
+export const FormNode = memo(({ data }: NodeProps) => {
+    const { name } = data;
 
-export const FormNode = memo<FormNodeProps>(({ data, isConnectable }) => {
     return (
-        <div
-            className="form-node"
-            onClick={data.onClick}
-        >
+        <div className="custom-node">
+            {/* Left handle (target) */}
             <Handle
                 type="target"
                 position={Position.Left}
-                isConnectable={isConnectable}
+                className="node-handle node-handle-left"
             />
-            <div className="form-node-content">
-                <div className="form-node-title">{data.name}</div>
-                <div className="form-node-fields">
-                    {data.fields.length} fields
-                </div>
+
+            <div className="node-icon">
+                <FaWpforms size={22} />
             </div>
+
+            <div className="node-text">
+                <div className="node-title">Form</div>
+                <div className="node-name">{name}</div>
+            </div>
+
+            {/* Right handle (source) */}
             <Handle
                 type="source"
                 position={Position.Right}
-                isConnectable={isConnectable}
+                className="node-handle node-handle-right"
             />
         </div>
     );

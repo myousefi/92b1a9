@@ -1,4 +1,5 @@
 import { GraphResponse, ProcessedGraphData, Field } from '../../types';
+import { apiGet, getBlueprintGraphUrl } from './apiClient';
 
 // Define the API URL, defaulting to localhost if not provided
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
@@ -9,13 +10,10 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
  */
 export async function fetchGraphData(): Promise<ProcessedGraphData> {
     try {
-        const response = await fetch(`${API_URL}/api/v1/frontendchallengeserver/actions/blueprints/graph`);
+        const url = getBlueprintGraphUrl();
+        console.log('Requesting graph data from:', url);
 
-        if (!response.ok) {
-            throw new Error(`API error: ${response.status}`);
-        }
-
-        const data: GraphResponse = await response.json();
+        const data = await apiGet<GraphResponse>(url);
         return processGraphData(data);
     } catch (error) {
         console.error('Error fetching graph data:', error);
@@ -57,6 +55,7 @@ function processGraphData(data: GraphResponse): ProcessedGraphData {
             id: node.id,
             name: node.data.name,
             fields,
+            position: node.position,
         };
     });
 

@@ -1,42 +1,15 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { LoadingError } from '../../../components/common/LoadingError';
 
-describe('LoadingError', () => {
-    it('should show loading state', () => {
-        render(
-            <LoadingError loading={true} error={null}>
-                <div>Content</div>
-            </LoadingError>
-        );
+describe('LoadingError Component', () => {
+    it('displays the error message', () => {
+        const message = 'Failed to load data';
+        const error = new Error('Network error');
 
-        expect(screen.getByText('Loading...')).toBeInTheDocument();
-        expect(screen.queryByText('Content')).not.toBeInTheDocument();
-    });
+        render(<LoadingError message={message} error={error} />);
 
-    it('should show error state', () => {
-        const error = new Error('Test error');
-
-        render(
-            <LoadingError loading={false} error={error}>
-                <div>Content</div>
-            </LoadingError>
-        );
-
-        expect(screen.getByText('Error')).toBeInTheDocument();
-        expect(screen.getByText('Test error')).toBeInTheDocument();
-        expect(screen.getByText('Retry')).toBeInTheDocument();
-        expect(screen.queryByText('Content')).not.toBeInTheDocument();
-    });
-
-    it('should show children when not loading and no error', () => {
-        render(
-            <LoadingError loading={false} error={null}>
-                <div>Content</div>
-            </LoadingError>
-        );
-
-        expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-        expect(screen.queryByText('Error')).not.toBeInTheDocument();
-        expect(screen.getByText('Content')).toBeInTheDocument();
+        expect(screen.getByText(message)).toBeInTheDocument();
+        expect(screen.getByText('Network error')).toBeInTheDocument();
     });
 });

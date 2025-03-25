@@ -1,74 +1,49 @@
-// Node represents a form in the graph
+// Node represents a form, branch, trigger, or configuration in the graph
 export interface Node {
     id: string;
-    type: string;
+    type: 'form' | 'branch' | 'trigger' | 'configuration';
     position: {
         x: number;
         y: number;
     };
     data: {
-        id: string;
-        component_key: string;
-        component_type: string;
+        id?: string;
         component_id: string;
         name: string;
-        prerequisites: string[];
-        permitted_roles: string[];
-        input_mapping: Record<string, any>;
-        sla_duration: {
-            number: number;
-            unit: string;
-        };
-        approval_required: boolean;
-        approval_roles: string[];
+        [key: string]: any;
     };
 }
 
-// Edge represents a dependency between forms
+// Edge represents a dependency between nodes
 export interface Edge {
     source: string;
     target: string;
+    [key: string]: any;
 }
 
 // Form represents a detailed form definition
 export interface Form {
+    $schema: string;
     id: string;
     name: string;
     description: string;
     is_reusable: boolean;
     field_schema: {
         type: string;
-        properties: Record<string, {
-            avantos_type?: string;
-            title?: string;
-            type: string;
-            format?: string;
-            items?: {
-                enum?: string[];
+        properties: {
+            [key: string]: {
+                avantos_type?: string;
+                title?: string;
                 type: string;
-            };
-            enum?: any[] | null;
-            uniqueItems?: boolean;
-        }>;
+                [key: string]: any;
+            }
+        };
         required: string[];
     };
-    ui_schema: {
-        type: string;
-        elements: Array<{
-            type: string;
-            scope: string;
-            label: string;
-            options?: Record<string, any>;
-        }>;
-    };
-    dynamic_field_config?: Record<string, {
-        selector_field: string;
-        payload_fields: Record<string, {
-            type: string;
-            value: string;
-        }>;
-        endpoint_id: string;
-    }>;
+    ui_schema: any;
+    dynamic_field_config: Record<string, object>;
+    custom_javascript?: string;
+    vendor_schema?: Record<string, any>;
 }
 
 // Field represents a form field extracted from form schema
@@ -77,7 +52,6 @@ export interface Field {
     name: string;
     type: string;
     required: boolean;
-    prefillMapping?: PrefillMapping;
 }
 
 // PrefillMapping defines how a field gets prefilled
@@ -90,16 +64,52 @@ export interface PrefillMapping {
 
 // GraphResponse represents the API response structure
 export interface GraphResponse {
-    id: string;
+    $schema: string;
+    blueprint_id: string;
+    blueprint_name: string;
     tenant_id: string;
+    status: 'draft' | 'published' | 'historical' | 'archived';
+    version_id: string;
+    version_notes: string;
+    version_number: string;
+    branches: Branch[] | null;
+    edges: Edge[] | null;
+    forms: Form[] | null;
+    nodes: Node[] | null;
+    triggers: TriggerEndpoint[] | null;
+}
+
+// Branch represents a decision point in the action blueprint
+export interface Branch {
+    $schema: string;
+    id: string;
     name: string;
     description: string;
-    category: string;
-    nodes: Node[];
-    edges: Edge[];
-    forms: Form[];
-    branches: any[];
-    triggers: any[];
+    tenant_id: string;
+    condition: Record<string, any>;
+    created_at: string; // date-time
+    created_by: string;
+    updated_at: string; // date-time
+}
+
+// TriggerEndpoint represents a trigger endpoint associated with the action blueprint
+export interface TriggerEndpoint {
+    $schema: string;
+    id: string;
+    name: string;
+    trigger_service_id: string;
+    path_template: string;
+    path_template_variables: string[] | null;
+    query_parameter_template: Record<string, string>;
+    query_parameter_template_variables: string[] | null;
+    payload_template: Record<string, any>;
+    payload_template_variables: string[] | null;
+    output_mapping: Record<string, string>;
+    request_method: 'POST' | 'PUT' | 'GET' | 'DELETE';
+    created_at: string; // date-time
+    updated_at: string; // date-time
+    max_retries?: number;
+    timeout_seconds?: number;
 }
 
 // ProcessedNode is a simplified node with extracted fields
@@ -107,6 +117,10 @@ export interface ProcessedNode {
     id: string;
     name: string;
     fields: Field[];
+    position: {
+        x: number;
+        y: number;
+    };
 }
 
 // ProcessedGraphData is the transformed data for our UI

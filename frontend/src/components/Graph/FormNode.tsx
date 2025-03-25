@@ -1,12 +1,12 @@
 import React, { memo } from 'react';
 import { Handle, Position, NodeProps } from 'reactflow';
-import { FaWpforms } from 'react-icons/fa'; // Import form icon
+import { FaWpforms } from 'react-icons/fa';
 
 export const FormNode = memo(({ data }: NodeProps) => {
-    const { name } = data;
+    const { name, onClick } = data;
 
     return (
-        <div className="custom-node">
+        <div className="custom-node" onClick={onClick}>
             {/* Left handle (target) */}
             <Handle
                 type="target"

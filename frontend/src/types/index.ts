@@ -1,7 +1,7 @@
-// Node represents a form, branch, trigger, or configuration in the graph
+// Node represents a form in the graph
 export interface Node {
     id: string;
-    type: 'form' | 'branch' | 'trigger' | 'configuration';
+    type: string;
     position: {
         x: number;
         y: number;
@@ -14,7 +14,7 @@ export interface Node {
     };
 }
 
-// Edge represents a dependency between nodes
+// Edge represents a dependency between forms
 export interface Edge {
     source: string;
     target: string;
@@ -23,7 +23,6 @@ export interface Edge {
 
 // Form represents a detailed form definition
 export interface Form {
-    $schema: string;
     id: string;
     name: string;
     description: string;
@@ -41,9 +40,7 @@ export interface Form {
         required: string[];
     };
     ui_schema: any;
-    dynamic_field_config: Record<string, object>;
-    custom_javascript?: string;
-    vendor_schema?: Record<string, any>;
+    dynamic_field_config: { [key: string]: any };
 }
 
 // Field represents a form field extracted from form schema
@@ -64,52 +61,17 @@ export interface PrefillMapping {
 
 // GraphResponse represents the API response structure
 export interface GraphResponse {
-    $schema: string;
-    blueprint_id: string;
-    blueprint_name: string;
-    tenant_id: string;
-    status: 'draft' | 'published' | 'historical' | 'archived';
-    version_id: string;
-    version_notes: string;
-    version_number: string;
-    branches: Branch[] | null;
-    edges: Edge[] | null;
-    forms: Form[] | null;
-    nodes: Node[] | null;
-    triggers: TriggerEndpoint[] | null;
-}
-
-// Branch represents a decision point in the action blueprint
-export interface Branch {
-    $schema: string;
-    id: string;
-    name: string;
-    description: string;
-    tenant_id: string;
-    condition: Record<string, any>;
-    created_at: string; // date-time
-    created_by: string;
-    updated_at: string; // date-time
-}
-
-// TriggerEndpoint represents a trigger endpoint associated with the action blueprint
-export interface TriggerEndpoint {
-    $schema: string;
-    id: string;
-    name: string;
-    trigger_service_id: string;
-    path_template: string;
-    path_template_variables: string[] | null;
-    query_parameter_template: Record<string, string>;
-    query_parameter_template_variables: string[] | null;
-    payload_template: Record<string, any>;
-    payload_template_variables: string[] | null;
-    output_mapping: Record<string, string>;
-    request_method: 'POST' | 'PUT' | 'GET' | 'DELETE';
-    created_at: string; // date-time
-    updated_at: string; // date-time
-    max_retries?: number;
-    timeout_seconds?: number;
+    $schema?: string;
+    id?: string;
+    tenant_id?: string;
+    name?: string;
+    description?: string;
+    category?: string;
+    branches?: any[];
+    edges: Edge[];
+    forms: Form[];
+    nodes: Node[];
+    triggers?: any[];
 }
 
 // ProcessedNode is a simplified node with extracted fields

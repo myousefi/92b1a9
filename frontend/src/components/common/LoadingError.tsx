@@ -25,9 +25,9 @@ export const LoadingError: React.FC<LoadingErrorProps> = ({ loading, error, chil
 
     if (error) {
         return (
-            <div className="error-container">
+            <div className="error">
                 <h3>Error</h3>
-                <p className="error-details">{error.message || 'An unknown error occurred'}</p>
+                <p className="error-details">{error.message}</p>
             </div>
         );
     }

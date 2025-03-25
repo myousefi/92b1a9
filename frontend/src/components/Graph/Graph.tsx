@@ -40,7 +40,6 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, onNodeClick }) => {
     }));
 
     // Convert our edges to ReactFlow edges with custom styling
-    // Using bezier type edges as requested
     const initialEdges: ReactFlowEdge[] = edges.map(edge => ({
         id: `${edge.source}-${edge.target}`,
         source: edge.source,
@@ -53,7 +52,6 @@ export const Graph: React.FC<GraphProps> = ({ nodes, edges, onNodeClick }) => {
             opacity: 0.9,
             transition: 'stroke-width ease-in-out .2s',
         },
-        // No arrow markers as per requirements
         className: 'custom-edge',
     }));
 
